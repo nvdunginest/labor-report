@@ -1,0 +1,31 @@
+﻿@model IEnumerable<LaborReport.Controllers.IndexViewModel>
+@{
+    ViewData["Title"] = "Index";
+}
+<div class="small">
+    <table class="table table-bordered table-striped table-sm disabled" id="dataTable">
+        <thead>
+            <tr>
+                <th>Mã số</th>
+                <th>Thời gian (phút)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CardNumber</td>
+                    <td>@item.TotalTime.ToString("0.00")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable();
+        });
+    </script>
+}
