@@ -70,7 +70,13 @@ namespace LaborReport.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(FileUpload file)
         {
+            if (_context.InOuts.FirstOrDefault(x => x.Time.Date == file.UploadDate) != null)
+            {
+                ModelState.AddModelError("", "Ngày đã chọn đã có dữ liệu trên hệ thống, không thể upload thêm dữ liệu");
+                return View(file);
+            }
             DataSet result;
+            bool hasData = false;
             var fileName = Guid.NewGuid().ToString();
             var filePath = $"{Directory.GetCurrentDirectory()}\\UploadData\\{fileName}.xls";
 
@@ -101,19 +107,31 @@ namespace LaborReport.Controllers
                 try
                 {
                     item.Time = DateTime.Parse(line.ItemArray[0].ToString());
-                    item.Id = Guid.NewGuid();
-                    item.CardNumber = line.ItemArray[1].ToString();
-                    item.Event = line.ItemArray[2].ToString();
-                    item.Status = line.ItemArray[3].ToString();
-                    item.Description = line.ItemArray[4].ToString();
+                    if (item.Time.Date == file.UploadDate)
+                    {
+                        item.Id = Guid.NewGuid();
+                        item.CardNumber = line.ItemArray[1].ToString();
+                        item.Event = line.ItemArray[2].ToString();
+                        item.Status = line.ItemArray[3].ToString();
+                        item.Description = line.ItemArray[4].ToString();
 
-                    _context.InOuts.Add(item);
+                        hasData = true;
+                        _context.InOuts.Add(item);
+                    }
                 }
                 catch { }
             }
 
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            if (hasData)
+            {
+                _context.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                ModelState.AddModelError("", "File upload không chứa dữ liệu của ngày lựa chọn!");
+                return View(file);
+            }
         }
     }
 
@@ -131,6 +149,10 @@ namespace LaborReport.Controllers
 
     public class FileUpload
     {
+        [Required]
+        [Display(Name = "Ngày upload dữ liệu")]
+        public DateTime UploadDate { get; set; }
+
         [Required]
         [Display(Name = "Chọn tệp tin dữ liệu")]
         public IFormFile FormFile { get; set; }

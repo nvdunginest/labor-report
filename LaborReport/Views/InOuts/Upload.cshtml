@@ -10,22 +10,17 @@
         <form asp-action="Upload" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <input type="file" asp-for="FormFile" class="form-control custom-file-input" id="customFile" accept="application/vnd.ms-excel" />
-                <label class="custom-file-label" for="customFile">Chọn file</label>
+                <label asp-for="UploadDate" class="control-label"></label>
+                <input type="date" asp-for="UploadDate" class="form-control" />
+                <span asp-validation-for="UploadDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FormFile" class="control-label"></label>
+                <input type="file" asp-for="FormFile" class="form-control-file" accept="application/vnd.ms-excel" />
                 <span asp-validation-for="FormFile" class="text-danger"></span>
             </div>
             <input type="submit" value="Upload" class="btn btn-primary btn-sm" />
         </form>
     </div>
 </div>
-
-@section Scripts{
-    <script>
-        // Add the following code if you want the name of the file appear on select
-        $(".custom-file-input").on("change", function () {
-            var fileName = $(this).val().split("\\").pop();
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-        });
-    </script>
-}
 
