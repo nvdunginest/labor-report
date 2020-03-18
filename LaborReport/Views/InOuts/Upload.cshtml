@@ -1,19 +1,31 @@
 ﻿@model LaborReport.Controllers.FileUpload
 @{
-    ViewData["Title"] = "Upload";
+    ViewData["Title"] = "Upload Data";
 }
 
-<h1>Upload</h1>
-<form enctype="multipart/form-data" method="post">
-    <dl>
-        <dt>
-            <label asp-for="FormFile"></label>
-        </dt>
-        <dd>
-            <input asp-for="FormFile" type="file">
-            <span asp-validation-for="FormFile"></span>
-        </dd>
-    </dl>
-    <input asp-page-handler="Upload" class="btn" type="submit" value="Upload" />
-</form>
+<h3>@ViewData["Title"]</h3>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <input type="file" asp-for="FormFile" class="form-control custom-file-input" id="customFile" accept="application/vnd.ms-excel" />
+                <label class="custom-file-label" for="customFile">Chọn file</label>
+                <span asp-validation-for="FormFile" class="text-danger"></span>
+            </div>
+            <input type="submit" value="Upload" class="btn btn-primary btn-sm" />
+        </form>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        // Add the following code if you want the name of the file appear on select
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}
 

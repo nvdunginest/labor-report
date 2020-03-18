@@ -132,7 +132,7 @@ namespace LaborReport.Controllers
     public class FileUpload
     {
         [Required]
-        [Display(Name = "File")]
+        [Display(Name = "Chọn tệp tin dữ liệu")]
         public IFormFile FormFile { get; set; }
     }
 }
