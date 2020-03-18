@@ -24,9 +24,62 @@ namespace LaborReport.Controllers
         }
         public IActionResult Index()
         {
+            var model = new IndexViewModel();
+            model.Table = new Data[7, 7];
+            var month = DateTime.Now.Month;
+            var year = DateTime.Now.Year;
+            var days = DateTime.DaysInMonth(year, month);
+
+            var startDate = new DateTime(year, month, 1);
+            var endDate = new DateTime(year, month, days);
+
+            var inOuts = _context.InOuts.Where(x => x.Time >= startDate && x.Time <= endDate);
+
+            for (int day = 1; day <= days; day++)
+            {
+                var date = new DateTime(year, month, day);
+                var col = (int)date.DayOfWeek > 0 ? (int)date.DayOfWeek - 1 : (int)date.DayOfWeek + 6;
+                var row = (day - col - 2) / 7 + 1;
+
+                var data = new Data()
+                {
+                    DateString = date.ToString("dd/MM"),
+                    Date = date,
+                    LinkData = date.ToString("yyyy-MM-dd")
+                };
+                if (inOuts.FirstOrDefault(x => x.Time.Date == date.Date) != null)
+                    data.HasData = true;
+                else
+                    data.HasData = false;
+
+                model.Table[row, col] = data;
+                model.RowMax = row;
+            }
+
+            return View(model);
+        }
+
+        public IActionResult Detail(string id)
+        {
+            DateTime date;
+            List<DetailViewModel> model;
+            try
+            {
+                date = DateTime.Parse(id);
+                model = GetData(date.Date, date.Date);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+            return View(model);
+        }
+
+        private List<DetailViewModel> GetData(DateTime start, DateTime end)
+        {
             var stacks = new List<Stack>();
-            var result = new List<IndexViewModel>();
-            var data = _context.InOuts.OrderBy(o => o.Time).ToList();
+            var result = new List<DetailViewModel>();
+            var data = _context.InOuts.Where(o => o.Time >= start.AddDays(-5) && o.Time <= end.AddDays(5)).OrderBy(o => o.Time).ToList();
             for (int i = 0; i < data.Count; i++)
             {
                 if (data[i].Event.Contains("Vào"))
@@ -37,7 +90,7 @@ namespace LaborReport.Controllers
                         stacks.Add(stack);
                         if (result.FirstOrDefault(x => x.CardNumber == data[i].CardNumber) == null)
                         {
-                            result.Add(new IndexViewModel { CardNumber = data[i].CardNumber });
+                            result.Add(new DetailViewModel { CardNumber = data[i].CardNumber });
                         }
                     }
                 }
@@ -46,11 +99,14 @@ namespace LaborReport.Controllers
                     var stack = stacks.FirstOrDefault(x => x.CardNumber == data[i].CardNumber);
                     if (stack != null)
                     {
-                        var item = result.FirstOrDefault(x => x.CardNumber == data[i].CardNumber);
-                        if (item != null)
+                        if (data[i].Time.Date >= start && data[i].Time.Date <= end)
                         {
-                            TimeSpan diff = data[i].Time.Subtract(stack.Time);
-                            item.TotalTime = item.TotalTime + diff.TotalSeconds / 60;
+                            var item = result.FirstOrDefault(x => x.CardNumber == data[i].CardNumber);
+                            if (item != null)
+                            {
+                                TimeSpan diff = data[i].Time.Subtract(stack.Time);
+                                item.TotalTime = item.TotalTime + diff.TotalSeconds / 60;
+                            }
                         }
 
                         stacks.Remove(stack);
@@ -58,7 +114,7 @@ namespace LaborReport.Controllers
                 }
             }
 
-            return View(result.OrderBy(x => x.CardNumber));
+            return result.Where(x => x.TotalTime != 0).ToList();
         }
 
         public IActionResult Upload()
@@ -135,7 +191,7 @@ namespace LaborReport.Controllers
         }
     }
 
-    public class IndexViewModel
+    public class DetailViewModel
     {
         public string CardNumber { get; set; }
         public double TotalTime { get; set; } = 0;
@@ -156,5 +212,19 @@ namespace LaborReport.Controllers
         [Required]
         [Display(Name = "Chọn tệp tin dữ liệu")]
         public IFormFile FormFile { get; set; }
+    }
+
+    public class Data
+    {
+        public string DateString { get; set; }
+        public bool HasData { get; set; }
+        public string LinkData { get; set; }
+        public DateTime Date { get; set; }
+    }
+
+    public class IndexViewModel
+    {
+        public Data[,] Table { get; set; }
+        public int RowMax { get; set; } = 0;
     }
 }

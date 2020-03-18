@@ -1,0 +1,22 @@
+﻿@model IEnumerable<LaborReport.Controllers.DetailViewModel>
+@{
+    ViewData["Title"] = "Detail";
+}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Mã thẻ</th>
+            <th>Số phút</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+        {
+            <tr>
+                <td>@item.CardNumber</td>
+                <td>@item.TotalTime.ToString("0.00")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

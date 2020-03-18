@@ -1,21 +1,51 @@
-﻿@model IEnumerable<LaborReport.Controllers.IndexViewModel>
+﻿@model LaborReport.Controllers.IndexViewModel
 @{
     ViewData["Title"] = "Index";
 }
-<table class="table table-striped table-sm">
-    <thead>
-        <tr>
-            <th>Mã số</th>
-            <th>Thời gian (phút)</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="col-6">
+    <table class="table font-weight-bold">
+        <thead>
             <tr>
-                <td>@item.CardNumber</td>
-                <td>@item.TotalTime.ToString("0.00")</td>
+                <th>Hai</th>
+                <th>Ba</th>
+                <th>Tư</th>
+                <th>Năm</th>
+                <th>Sáu</th>
+                <th>Bảy</th>
+                <th>CN</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @for (int row = 0; row <= Model.RowMax; row++)
+            {
+                <tr>
+                    @for (int col = 0; col < 7; col++)
+                    {
+                        if (Model.Table[row, col] != null)
+                        {
+                            if (Model.Table[row, col].HasData)
+                            {
+                                <td class="bg-success"><a asp-action="Detail" asp-route-id="@Model.Table[row, col].LinkData">@Model.Table[row, col].DateString</a></td>
+                            }
+                            else
+                            {
+                                if (DateTime.Now.Date > Model.Table[row, col].Date)
+                                {
+                                    <td class="bg-warning">@Model.Table[row, col].DateString</td>
+                                }
+                                else
+                                {
+                                    <td>@Model.Table[row, col].DateString</td>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <td></td>
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
